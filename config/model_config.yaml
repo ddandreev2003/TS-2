@@ -1,0 +1,21 @@
+# Model and pipeline configuration template
+# Replace defaults with validated values during implementation.
+
+data:
+  target_columns:
+    - Income
+    - Outcome
+  derived_target: Balance
+  date_column: Date
+
+features:
+  lags: [1, 2, 3, 5, 7, 14]
+  rolling_windows: [3, 7, 14, 30]
+
+split:
+  test_size: 0.2
+  validation_size: 0.1
+  time_series_cv_folds: 5
+
+metrics:
+  balance_mae_threshold: 0.42

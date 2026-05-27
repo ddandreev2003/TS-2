@@ -1,0 +1,810 @@
+MLOps-расширение: Автономный Pipeline с MLflow
+
+# AGENTS.md — Autonomous MLOps Pipeline: Liquidity Balance Forecasting
+
+> Расширенная инструкция для AI-агента.
+> Добавляет полный MLOps-слой поверх базового forecasting pipeline:
+> эксперименты, версионирование, CI/CD, мониторинг, автодеплой.
+
+---
+
+## 1. ОБЗОР АРХИТЕКТУРЫ MLOPS
+┌─────────────────────────────────────────────────────────────────┐ │ AUTONOMOUS MLOPS PIPELINE │ │ │ │ DATA LAYER TRAIN LAYER SERVE LAYER │ │ ────────── ─────────── ─────────── │ │ DVC (версии) ──► MLflow Tracking ──► MLflow Registry │ │ Feature Store Optuna HPO Model Serving (FastAPI) │ │ Drift Detector Auto-retraining Prometheus + Grafana │ │ CI/CD (GitLab) Alert Manager │ └─────────────────────────────────────────────────────────────────┘
+
+
+Источники по лучшим практикам 2026:
+- [mlflow.org](https://mlflow.org/articles/mlops-pipeline-automation-best-practices-in-2026/)
+- [habr.com](https://habr.com/ru/companies/kts/articles/993670/)
+- [ai-news.ru](https://ai-news.ru/2025/04/postroenie_ci_cd_frejmvorka_mlops_urovnya_enterprise_mlflow_kubeflow.html)
+
+---
+
+## 2. ОБНОВЛЁННАЯ СТРУКТУРА ПРОЕКТА
+
+liquidity_forecast/ │ ├── AGENTS.md # ← главная инструкция агента ├── README.md ├── .gitlab-ci.yml # CI/CD pipeline (GitLab) ├── docker-compose.yml # локальный стек (MLflow + Minio + Postgres) ├── Dockerfile # образ для обучения и инференса │ ├── config/ │ ├── model_config.yaml # гиперпараметры, пороги, флаги │ ├── mlflow_config.yaml # tracking URI, experiment names │ └── monitoring_config.yaml # пороги дрейфа, алерты │ ├── data/ │ ├── .dvc/ # DVC-конфиги (версионирование данных) │ ├── raw/ # сырые данные (только через DVC pull) │ ├── processed/ │ └── external/ │ ├── src/ │ ├── features/ # (без изменений из v1) │ ├── selection/ │ ├── models/ │ ├── tuning/ │ ├── calibration/ │ ├── drift/ │ ├── metrics/ │ │ │ ├── mlops/ # ← НОВЫЙ СЛОЙ │ │ ├── experiment_tracker.py # обёртка над MLflow Tracking │ │ ├── model_registry.py # регистрация/продвижение моделей │ │ ├── feature_store.py # единое хранилище признаков │ │ ├── auto_retrain.py # триггеры и логика дообучения │ │ └── pipeline_orchestrator.py # оркестратор (Airflow/Prefect) │ │ │ └── serving/ # ← НОВЫЙ СЛОЙ │ ├── api.py # FastAPI: /predict, /health, /metrics │ ├── model_loader.py # загрузка модели из MLflow Registry │ └── shadow_mode.py # теневое тестирование новой модели │ ├── pipelines/ │ ├── train_pipeline.py # end-to-end train → log → register │ ├── retrain_pipeline.py # auto-retrain по триггеру │ └── eval_pipeline.py # валидация перед продвижением │ ├── monitoring/ │ ├── prometheus/ │ │ └── prometheus.yml │ ├── grafana/ │ │ └── dashboards/ │ │ ├── model_performance.json │ │ └── data_drift.json │ └── alerts/ │ └── alert_rules.yml │ ├── tests/ │ ├── unit/ │ ├── integration/ │ └── model_quality/ # тесты на MAE, drift, bias │ └── logs/ ├── mlflow/ # артефакты MLflow ├── retraining/ └── drift_alerts/
+
+
+---
+
+## 3. MLFLOW: ДЕТАЛЬНЫЕ ИНСТРУКЦИИ ДЛЯ АГЕНТА
+
+### 3.1 Инициализация эксперимента
+
+```python
+# src/mlops/experiment_tracker.py
+#
+# ПОЧЕМУ: MLflow Tracking — единая точка хранения всех экспериментов.
+# Агент НИКОГДА не запускает обучение без активного MLflow run.
+# КАК: обёртка-контекст-менеджер гарантирует логирование даже при падении.
+
+import mlflow
+import mlflow.sklearn
+import mlflow.statsmodels
+from contextlib import contextmanager
+from pathlib import Path
+import yaml
+
+
+class ExperimentTracker:
+    """
+    Обёртка над MLflow для унифицированного логирования.
+    Агент использует только этот класс, не вызывает mlflow напрямую.
+    """
+
+    def __init__(self, config_path: str = "config/mlflow_config.yaml"):
+        with open(config_path) as f:
+            cfg = yaml.safe_load(f)
+
+        # ПОЧЕМУ: tracking URI вынесен в конфиг, не захардкожен
+        mlflow.set_tracking_uri(cfg["tracking_uri"])
+        self.experiment_name = cfg["experiment_name"]
+        mlflow.set_experiment(self.experiment_name)
+
+    @contextmanager
+    def start_run(self, run_name: str, tags: dict = None):
+        """
+        ПОЧЕМУ: контекст-менеджер гарантирует корректное завершение run
+        даже при исключении. КАК: yield внутри with mlflow.start_run()
+        """
+        with mlflow.start_run(run_name=run_name, tags=tags or {}) as run:
+            yield run
+
+    def log_all(
+        self,
+        params: dict,
+        metrics: dict,
+        model,
+        model_type: str,
+        artifacts_dir: Path = None,
+        feature_importance: dict = None,
+    ):
+        """
+        ПОЧЕМУ: единый метод логирования — агент не забудет залогировать
+        ни один артефакт. КАК: последовательно вызывает все log_* методы.
+        """
+        # Параметры модели и пайплайна
+        mlflow.log_params(params)
+
+        # Метрики качества
+        mlflow.log_metrics(metrics)
+
+        # Сохранение модели с сигнатурой входных данных
+        if model_type == "sklearn":
+            mlflow.sklearn.log_model(model, artifact_path="model")
+        elif model_type == "statsmodels":
+            mlflow.statsmodels.log_model(model, artifact_path="model")
+        elif model_type == "catboost":
+            mlflow.catboost.log_model(model, artifact_path="model")
+
+        # Feature importance как отдельный артефакт
+        if feature_importance:
+            mlflow.log_dict(feature_importance, "feature_importance.json")
+
+        # Дополнительные артефакты (графики, отчёты)
+        if artifacts_dir and artifacts_dir.exists():
+            mlflow.log_artifacts(str(artifacts_dir))
+3.2 Model Registry: стадии жизни модели
+
+# src/mlops/model_registry.py
+#
+# ПОЧЕМУ: Model Registry — единый источник правды о том,
+# какая модель сейчас в проде. Агент не деплоит напрямую из кода обучения.
+# КАК: модель проходит стадии Staging → (тесты) → Production → Archived
+
+import mlflow
+from mlflow.tracking import MlflowClient
+
+
+class ModelRegistry:
+    """
+    Управление жизненным циклом модели через MLflow Model Registry.
+
+    Стадии:
+        None       → модель только что залогирована
+        Staging    → прошла автотесты, ждёт валидации
+        Production → активная боевая модель
+        Archived   → выведена из эксплуатации
+    """
+
+    # Пороги для автоматического продвижения в Production
+    QUALITY_GATES = {
+        "mae": 0.42,           # жёсткое требование заказчика
+        "mae_improvement": 0.01,  # новая модель должна быть лучше на 1%
+    }
+
+    def __init__(self):
+        self.client = MlflowClient()
+        self.model_name = "liquidity_balance_forecaster"
+
+    def register_model(self, run_id: str) -> str:
+        """
+        ПОЧЕМУ: регистрируем модель сразу после обучения для версионирования.
+        КАК: получаем URI артефакта из run и регистрируем в Registry.
+        """
+        model_uri = f"runs:/{run_id}/model"
+        mv = mlflow.register_model(model_uri, self.model_name)
+        return mv.version
+
+    def promote_to_staging(self, version: str):
+        """Переводим в Staging — модель готова к тестированию."""
+        self.client.transition_model_version_stage(
+            name=self.model_name,
+            version=version,
+            stage="Staging",
+            archive_existing_versions=False,
+        )
+
+    def promote_to_production(self, version: str, metrics: dict):
+        """
+        ПОЧЕМУ: автоматическое продвижение только при прохождении
+        quality gates. КАК: проверяем MAE и относительное улучшение.
+        """
+        # Quality Gate 1: абсолютный порог MAE
+        if metrics["mae"] > self.QUALITY_GATES["mae"]:
+            raise ValueError(
+                f"Quality Gate FAILED: MAE={metrics['mae']:.4f} > "
+                f"{self.QUALITY_GATES['mae']}. "
+                f"Модель НЕ продвинута в Production."
+            )
+
+        # Quality Gate 2: улучшение относительно текущей prod-модели
+        current_prod = self._get_production_metrics()
+        if current_prod:
+            improvement = (current_prod["mae"] - metrics["mae"]) / current_prod["mae"]
+            if improvement < self.QUALITY_GATES["mae_improvement"]:
+                raise ValueError(
+                    f"Quality Gate FAILED: улучшение {improvement:.2%} < "
+                    f"порога {self.QUALITY_GATES['mae_improvement']:.2%}."
+                )
+
+        # Переводим текущую prod в Archived
+        self.client.transition_model_version_stage(
+            name=self.model_name,
+            version=version,
+            stage="Production",
+            archive_existing_versions=True,   # старая → Archived автоматически
+        )
+
+    def _get_production_metrics(self) -> dict | None:
+        """Получить метрики текущей Production модели."""
+        versions = self.client.get_latest_versions(
+            self.model_name, stages=["Production"]
+        )
+        if not versions:
+            return None
+        run = self.client.get_run(versions[0].run_id)
+        return run.data.metrics
+4. CI/CD PIPELINE (GitLab)
+
+# .gitlab-ci.yml
+#
+# ПОЧЕМУ: автоматизируем весь цикл train→test→deploy.
+# Агент генерирует этот файл в корне репозитория.
+# КАК: 4 стадии, каждая зависит от предыдущей.
+# Источник паттерна: forpes.ru — "весь MLOps в 10 строк"
+
+stages:
+  - validate_data      # проверка качества входных данных
+  - train              # обучение + логирование в MLflow
+  - evaluate           # quality gates + сравнение с prod
+  - deploy             # деплой в Staging / Production
+
+variables:
+  MLFLOW_TRACKING_URI: "\${MLFLOW_TRACKING_URI}"  # из GitLab CI/CD secrets
+  MODEL_NAME: "liquidity_balance_forecaster"
+  PYTHON_IMAGE: "python:3.11-slim"
+
+# ─── СТАДИЯ 1: Валидация данных ────────────────────────────────
+validate_data:
+  stage: validate_data
+  image: $PYTHON_IMAGE
+  script:
+    - pip install -r requirements.txt -q
+    - python -m src.drift.detector --mode=input_validation
+    - python -m tests.data_quality.check_schema
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'   # по расписанию (авто-ретрейн)
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# ─── СТАДИЯ 2: Обучение ────────────────────────────────────────
+train_model:
+  stage: train
+  image: $PYTHON_IMAGE
+  needs: ["validate_data"]
+  script:
+    - pip install -r requirements.txt -q
+    - |
+      python -m pipelines.train_pipeline \
+        --config config/model_config.yaml \
+        --log-to-mlflow \
+        --run-name "ci_run_\${CI_COMMIT_SHORT_SHA}"
+  artifacts:
+    reports:
+      # сохраняем run_id для следующих стадий
+      dotenv: train.env
+    paths:
+      - logs/mlflow/
+    expire_in: 7 days
+
+# ─── СТАДИЯ 3: Оценка качества ────────────────────────────────
+evaluate_model:
+  stage: evaluate
+  image: $PYTHON_IMAGE
+  needs: ["train_model"]
+  script:
+    - pip install -r requirements.txt -q
+    - |
+      python -m pipelines.eval_pipeline \
+        --run-id $MLFLOW_RUN_ID \
+        --quality-gate-mae 0.42 \
+        --compare-with-production
+  # Блокируем деплой если тесты не прошли
+  allow_failure: false
+
+# ─── СТАДИЯ 4: Деплой ─────────────────────────────────────────
+deploy_staging:
+  stage: deploy
+  image: $PYTHON_IMAGE
+  needs: ["evaluate_model"]
+  script:
+    - python -m src.mlops.model_registry --promote-to-staging --run-id $MLFLOW_RUN_ID
+    - docker build -t liquidity-forecast:staging .
+    - docker push $REGISTRY/liquidity-forecast:staging
+  environment:
+    name: staging
+  only:
+    - main
+
+deploy_production:
+  stage: deploy
+  needs: ["deploy_staging"]
+  script:
+    - python -m src.mlops.model_registry --promote-to-production --run-id $MLFLOW_RUN_ID
+    - docker tag $REGISTRY/liquidity-forecast:staging $REGISTRY/liquidity-forecast:prod
+    - docker push $REGISTRY/liquidity-forecast:prod
+    # Rolling update без даунтайма
+    - kubectl set image deployment/liquidity-forecast \
+        api=$REGISTRY/liquidity-forecast:prod
+  environment:
+    name: production
+  when: manual        # ручное подтверждение для прода
+  only:
+    - main
+5. АВТОМАТИЧЕСКОЕ ДООБУЧЕНИЕ (Auto-Retraining)
+
+# src/mlops/auto_retrain.py
+#
+# ПОЧЕМУ: модель деградирует со временем из-за изменения поведения ликвидности.
+# Дообучение должно быть полностью автономным — без ручного вмешательства.
+# КАК: три независимых триггера → очередь → pipeline дообучения.
+
+from enum import Enum
+from datetime import datetime
+import yaml
+
+
+class RetriggerReason(Enum):
+    SCHEDULE = "scheduled"           # плановое (раз в N дней)
+    DRIFT_DETECTED = "drift"         # детектор разладки сработал
+    MAE_DEGRADATION = "mae_drop"     # MAE вырос выше порога в проде
+
+
+class AutoRetrainOrchestrator:
+    """
+    Оркестратор автоматического дообучения.
+    Определяет: нужно ли дообучать, когда, на каких данных.
+    """
+
+    def __init__(self, config_path: str = "config/model_config.yaml"):
+        with open(config_path) as f:
+            self.cfg = yaml.safe_load(f)["retraining"]
+
+    def check_triggers(self, drift_signal: bool, current_mae: float) -> RetriggerReason | None:
+        """
+        ПОЧЕМУ: проверяем все триггеры в порядке приоритета.
+        Drift > MAE degradation > Schedule.
+        КАК: возвращаем причину или None (дообучение не нужно).
+        """
+        # Триггер 1 (высший приоритет): разладка ряда
+        if drift_signal:
+            return RetriggerReason.DRIFT_DETECTED
+
+        # Триггер 2: деградация метрики в проде
+        if current_mae > self.cfg["mae_alert_threshold"]:
+            return RetriggerReason.MAE_DEGRADATION
+
+        # Триггер 3: плановое расписание
+        if self._is_scheduled():
+            return RetriggerReason.SCHEDULE
+
+        return None  # дообучение не нужно
+
+    def get_training_window(self, reason: RetriggerReason) -> tuple[str, str]:
+        """
+        ПОЧЕМУ: размер окна дообучения зависит от причины триггера.
+        При разладке берём только свежие данные (после точки разладки).
+        При плановом — скользящее окно фиксированного размера.
+        КАК: возвращаем (date_from, date_to) для фильтрации данных.
+        """
+        windows = {
+            RetriggerReason.SCHEDULE:      self.cfg["window_days_scheduled"],
+            RetriggerReason.MAE_DEGRADATION: self.cfg["window_days_degradation"],
+            RetriggerReason.DRIFT_DETECTED:  self.cfg["window_days_post_drift"],
+        }
+        days = windows[reason]
+        date_to = datetime.today().strftime("%Y-%m-%d")
+        date_from = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+        return date_from, date_to
+
+    def _is_scheduled(self) -> bool:
+        """Проверяем расписание из конфига (например, каждые 7 дней)."""
+        # Логика сравнения с last_retrain_date из MLflow Registry
+        ...
+6. МОНИТОРИНГ: Prometheus + Grafana
+
+# src/serving/api.py
+#
+# ПОЧЕМУ: каждый прогноз должен логировать метрики для мониторинга.
+# Prometheus собирает, Grafana визуализирует, AlertManager уведомляет.
+# КАК: FastAPI + prometheus_fastapi_instrumentator + кастомные метрики.
+
+from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Histogram, Counter, Gauge
+import mlflow
+import numpy as np
+
+app = FastAPI(title="Liquidity Forecast API")
+
+# ─── Кастомные метрики Prometheus ──────────────────────────────
+PREDICTION_MAE = Gauge(
+    "model_prediction_mae",
+    "Скользящий MAE последних N прогнозов"
+)
+PREDICTION_VALUE = Histogram(
+    "model_prediction_value",
+    "Распределение предсказанных значений сальдо",
+    buckets=[-2, -1, -0.5, 0, 0.5, 1, 2]
+)
+DRIFT_ALERT = Counter(
+    "model_drift_alerts_total",
+    "Количество срабатываний детектора разладки"
+)
+RETRAIN_COUNTER = Counter(
+    "model_retrain_total",
+    "Количество дообучений",
+    ["reason"]   # reason: scheduled | drift | mae_drop
+)
+
+# Подключаем стандартные метрики FastAPI (latency, RPS, errors)
+Instrumentator().instrument(app).expose(app)
+
+
+@app.post("/predict")
+async def predict(features: dict):
+    """
+    ПОЧЕМУ: единая точка входа для всех прогнозов.
+    КАК: загружаем актуальную prod-модель из MLflow Registry,
+    логируем входные данные и предсказание для мониторинга.
+    """
+    # Загрузка актуальной модели
+    model = mlflow.pyfunc.load_model(
+        model_uri=f"models:/liquidity_balance_forecaster/Production"
+    )
+    prediction = model.predict(features)
+
+    # Логируем в Prometheus
+    PREDICTION_VALUE.observe(float(prediction))
+
+    return {"prediction": float(prediction), "model_version": model.metadata.run_id}
+
+
+@app.get("/health")
+async def health():
+    """Проверка доступности сервиса и актуальности модели."""
+    return {"status": "ok", "model": "Production"}
+
+# monitoring/alerts/alert_rules.yml
+#
+# ПОЧЕМУ: автоматические уведомления без участия человека.
+# КАК: Prometheus AlertManager отправляет в Slack/Email при нарушении порогов.
+
+groups:
+  - name: liquidity_model_alerts
+    rules:
+
+      # Алерт 1: MAE вышел за допустимый порог
+      - alert: ModelMAEDegradation
+        expr: model_prediction_mae > 0.42
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "MAE модели превысил порог 0.42"
+          description: "Текущий MAE: {{ $value }}. Требуется дообучение."
+
+      # Алерт 2: Детектор разладки сработал
+      - alert: DataDriftDetected
+        expr: increase(model_drift_alerts_total[1h]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Обнаружена разладка ряда"
+          description: "Рассмотреть переключение на ручное управление."
+
+      # Алерт 3: Модель не переобучалась слишком долго
+      - alert: ModelStale
+        expr: time() - model_last_retrain_timestamp > 86400 * 14
+        labels:
+          severity: warning
+        annotations:
+          summary: "Модель не обновлялась более 14 дней"
+7. ВЕРСИОНИРОВАНИЕ ДАННЫХ (DVC)
+
+# ПОЧЕМУ: воспроизводимость экспериментов невозможна без версионирования данных.
+# КАК: DVC хранит данные в S3/Minio, в Git хранятся только .dvc-указатели.
+
+# Инициализация (агент выполняет один раз)
+dvc init
+dvc remote add -d minio s3://liquidity-data/dvc
+dvc remote modify minio endpointurl http://minio:9000
+
+# Добавление данных под версионирование
+dvc add data/raw/liquidity_flows.parquet
+git add data/raw/liquidity_flows.parquet.dvc .gitignore
+git commit -m "feat: add raw liquidity data v1.0"
+
+# Воспроизведение любого эксперимента по git-тегу
+git checkout v1.3
+dvc pull          # скачает ровно те данные, что были в v1.3
+python -m pipelines.train_pipeline   # результат будет идентичным
+8. DOCKER-COMPOSE: ЛОКАЛЬНЫЙ СТЕК
+
+# docker-compose.yml
+#
+# ПОЧЕМУ: агент разворачивает полный стек одной командой для локальной разработки.
+# КАК: все сервисы в одной сети, данные персистентны через volumes.
+
+version: "3.9"
+services:
+
+  # ─── MLflow Tracking Server ────────────────────────────────
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    ports:
+      - "5000:5000"
+    command: >
+      mlflow server
+        --backend-store-uri postgresql://mlflow:mlflow@postgres/mlflow
+        --default-artifact-root s3://mlflow-artifacts
+        --host 0.0.0.0
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+    depends_on: [postgres, minio]
+
+  # ─── PostgreSQL: бэкенд MLflow ────────────────────────────
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ─── Minio: S3-совместимое хранилище артефактов ───────────
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # ─── Prometheus ───────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # ─── Grafana ──────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+  # ─── FastAPI Serving ──────────────────────────────────────
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    depends_on: [mlflow]
+
+volumes:
+  postgres_data:
+  minio_data:
+9. ПОЛНЫЙ ЦИКЛ: ИНСТРУКЦИЯ ДЛЯ АГЕНТА
+ТРИГГЕР (расписание / drift / MAE деградация)
+         │
+         ▼
+[1] auto_retrain.py::check_triggers()
+    → определяем причину и окно данных
+         │
+         ▼
+[2] DVC pull → загрузка актуальных данных
+         │
+         ▼
+[3] train_pipeline.py
+    → feature engineering
+    → feature selection
+    → Optuna HPO
+    → обучение (ML + авторегрессионные)
+    → ExperimentTracker.log_all()  ← всё в MLflow
+         │
+         ▼
+[4] eval_pipeline.py
+    → Quality Gate: MAE ≤ 0.42?
+    → Quality Gate: лучше текущего прода?
+    → если ОК → ModelRegistry.promote_to_staging()
+         │
+         ▼
+[5] GitLab CI: deploy_staging job
+    → интеграционные тесты
+    → shadow mode (параллельный прогноз)
+         │
+         ▼
+[6] (ручное подтверждение ИЛИ авто при высокой уверенности)
+    → ModelRegistry.promote_to_production()
+         │
+         ▼
+[7] Prometheus мониторит MAE, drift
+    → алерт → goto [1]
+10. ОБНОВЛЁННЫЕ КРИТЕРИИ ГОТОВНОСТИ (Definition of Done)
+Функциональные (из v1)
+ MAE ≤ 0.42 на тестовой выборке
+ Авторегрессионные модели исследованы
+ Детектор разладки протестирован
+MLOps (новые)
+ Все эксперименты логируются в MLflow (параметры + метрики + артефакты)
+ Model Registry настроен: Staging → Production → Archived
+ Quality Gates блокируют продвижение плохой модели
+ CI/CD pipeline проходит зелёным на тестовых данных
+ Данные версионированы через DVC (воспроизводимость)
+ Auto-retraining отрабатывает по всем трём триггерам
+ Prometheus собирает метрики, Grafana отображает дашборды
+ Алерты срабатывают при MAE > 0.42 и при дрейфе
+ docker-compose up поднимает весь стек за одну команду
+ Shadow mode протестирован перед каждым деплоем в прод
+
+
+
+# AGENTS.md — Liquidity Balance Forecasting Agent
+
+> Системная инструкция для AI-агента, реализующего модель прогнозирования
+> сальдо ликвидности (разница между притоками и оттоками денежных средств).
+> Агент должен строго следовать этому документу на всех этапах разработки.
+
+---
+
+## 1. КОНТЕКСТ ЗАДАЧИ
+
+### Что прогнозируем
+- **Целевая переменная**: сальдо ликвидности = притоки − оттоки за день
+- **Природа данных**: временные ряды — срезы в обозначенные моменты времени
+- **Горизонт**: однодневный прогноз (день вперёд)
+- **Целевая точность**: MAE ≤ 0.42 в абсолютном значении (требование заказчика)
+
+### Бизнес-контекст (КРИТИЧНО для понимания цели)
+Прогнозная величина используется позиционером (управляющим ликвидностью) для принятия решений:
+
+| Ситуация | Действие | Ставка |
+|----------|----------|--------|
+| Профицит ликвидности на конец дня | Размещение в ЦБ по overnight | Ключ − 0.9% |
+| Дефицит ликвидности на конец дня | Займ по overnight | Ключ + 1% |
+
+**Следствие**: ошибка прогноза имеет асимметричную стоимость.
+Агент обязан учитывать это при выборе метрики оптимизации.
+
+---
+
+## 2. ТРЕБОВАНИЯ К МОДЕЛИ
+
+### 2.1 Метрика оптимизации
+- [ ] Выбор метрики должен быть **обоснован бизнес-потребностью**
+- [ ] Обязательно рассмотреть асимметричные метрики (например, взвешенный MAE)
+- [ ] Жёсткое требование заказчика: итоговый MAE ≤ 0.42
+- [ ] Каждый блок кода должен содержать комментарий:
+  - чем руководствовались при реализации
+  - как именно работает блок
+
+### 2.2 Признаки (Feature Engineering)
+Агент обязан исследовать следующие группы факторов:
+
+```python
+FEATURE_GROUPS = {
+    "autoregressive": [
+        "лаги таргета (t-1, t-2, ..., t-N)",
+        "скользящие средние по таргету",
+        "экспоненциальные скользящие средние",
+        "rolling std, min, max"
+    ],
+    "calendar": [
+        "день недели",
+        "день месяца",
+        "даты налоговых дней",        # ВАЖНЫЙ фактор по подсказке заказчика
+        "признак конца/начала квартала",
+        "признак праздника"
+    ],
+    "macroeconomic": [
+        "ключевая ставка ЦБ",
+        "overnight ставки (RUONIA и др.)",
+        "прочие макро-факторы"         # исследовать доступность данных
+    ]
+}
+2.3 Отбор признаков (Feature Selection)
+ Модель обязана иметь модуль отбора признаков
+ Метод отбора должен быть более стабильным относительно альтернатив
+Сравнение с baseline-методами обязательно (например, корреляция vs. SHAP vs. Boruta)
+Предпочтение: методы, устойчивые к мультиколлинеарности и выбросам
+ Результаты отбора логировать и сохранять
+2.4 Автоподбор гиперпараметров
+ Реализовать автоматический подбор гиперпараметров
+ Оптимизация по целевой метрике (не по умолчанию библиотеки)
+ Рекомендуемые инструменты: Optuna, Hyperopt, BayesSearchCV
+ Результаты каждого запуска сохранять в logs/hyperparam_search/
+2.5 Авторегрессионные модели (ОБЯЗАТЕЛЬНО)
+⚠️ АГЕНТ ОБЯЗАН исследовать авторегрессионные модели.
+Это явное требование заказчика, пропустить нельзя.
+ ARIMA / SARIMA
+ ARIMAX (с внешними регрессорами)
+ VAR (если есть несколько связанных рядов)
+ Сравнить с ML-моделями по итоговой метрике
+2.6 Калибровка модели
+ Подобрать оптимальную частоту переобучения/калибровки
+ Если калибровка занимает значительное время — проверить её достаточность (нет ли деградации качества при редкой калибровке)
+ Задокументировать выбранную частоту и обоснование
+2.7 Автоматическое дообучение
+Модель должна дообучаться автоматически.
+Все модули работают без ручных корректировок.
+ Реализовать pipeline дообучения на новых данных
+ Выбор периода дообучения должен быть автоматическим (не захардкоженным)
+Рекомендация: на основе детектора разладки (см. п. 2.8) или скользящего окна
+ Pipeline логирует каждое дообучение: дата, объём данных, метрика до/после
+2.8 Детектор разладки (Drift Detection)
+⚠️ КРИТИЧНЫЙ МОДУЛЬ — сигнализирует о необходимости ручного управления.
+ Реализовать модуль выявления статистической разладки ряда
+ При обнаружении разладки — выдавать сигнал (алерт/флаг)
+ Рекомендуемые методы:
+CUSUM
+Page-Hinkley test
+ADWIN
+Сравнение распределений (KS-test, PSI)
+ Порог чувствительности — настраиваемый параметр
+3. АРХИТЕКТУРА ПРОЕКТА
+liquidity_forecast/
+│
+├── AGENTS.md                   # ← этот файл (главная инструкция агента)
+├── README.md                   # описание для людей
+│
+├── data/
+│   ├── raw/                    # сырые данные (не изменять!)
+│   ├── processed/              # обработанные данные
+│   └── external/               # макро-данные, налоговый календарь
+│
+├── src/
+│   ├── features/
+│   │   ├── autoregressive.py   # лаги, средние по таргету
+│   │   ├── calendar.py         # даты, налоговые дни, праздники
+│   │   └── macro.py            # макроэкономические факторы
+│   │
+│   ├── selection/
+│   │   └── feature_selector.py # модуль отбора признаков (стабильный метод)
+│   │
+│   ├── models/
+│   │   ├── autoregressive.py   # ARIMA/SARIMA/ARIMAX/VAR
+│   │   ├── ml_models.py        # CatBoost/LightGBM/XGBoost и др.
+│   │   └── ensemble.py         # ансамблирование (опционально)
+│   │
+│   ├── tuning/
+│   │   └── hyperopt.py         # автоподбор гиперпараметров (Optuna)
+│   │
+│   ├── calibration/
+│   │   └── recalibrator.py     # модуль калибровки и дообучения
+│   │
+│   ├── drift/
+│   │   └── detector.py         # детектор разладки → сигнал тревоги
+│   │
+│   └── metrics/
+│       └── business_metrics.py # MAE, asymmetric loss, business cost
+│
+├── notebooks/
+│   ├── 01_eda.ipynb            # исследовательский анализ данных
+│   ├── 02_feature_research.ipynb
+│   ├── 03_model_comparison.ipynb
+│   └── 04_final_validation.ipynb
+│
+├── logs/
+│   ├── hyperparam_search/      # история подбора гиперпараметров
+│   ├── retraining/             # логи дообучений
+│   └── drift_alerts/           # логи сигналов разладки
+│
+├── tests/
+│   └── ...                     # тесты для каждого модуля
+│
+└── config/
+    └── model_config.yaml       # все параметры — не захардкожены в коде
+4. ПРАВИЛА ПОВЕДЕНИЯ АГЕНТА
+Обязательный порядок работы
+1. EDA → 2. Feature Engineering → 3. Feature Selection →
+4. Baseline модели (в т.ч. авторегрессионные) →
+5. Подбор гиперпараметров → 6. Сравнение моделей →
+7. Калибровка/дообучение → 8. Детектор разладки →
+9. Финальная валидация (MAE ≤ 0.42?)
+Правила написания кода
+Каждый блок должен иметь комментарий: # Почему так + # Как работает
+Никаких захардкоженных констант — всё в config/model_config.yaml
+Все промежуточные результаты логировать
+Никаких ручных корректировок в production pipeline
+Правила сравнения моделей
+Сравнение всегда по одному набору данных (hold-out или time-series CV)
+Baseline = наивный прогноз (последнее известное значение)
+Финальная таблица сравнения обязательна перед выбором модели
+Стоп-сигналы (агент останавливается и сообщает)
+MAE > 0.42 на тестовой выборке — не деплоить, сообщить и предложить улучшения
+Детектор разладки сработал — выдать алерт, не переобучать автоматически
+Данные содержат пропуски > 20% — остановиться, запросить решение
+5. КРИТЕРИИ ГОТОВНОСТИ (Definition of Done)
+ MAE ≤ 0.42 на тестовой выборке
+ Авторегрессионные модели исследованы и задокументированы
+ Модуль отбора признаков реализован и сравнён с альтернативами
+ Гиперпараметры подобраны автоматически
+ Pipeline дообучения работает без ручного вмешательства
+ Детектор разладки протестирован на синтетических данных
+ Все блоки кода прокомментированы (почему + как)
+ Частота калибровки обоснована и задокументирована
+ Все результаты воспроизводимы (зафиксированы random seeds)
+6. ССЫЛКИ И КОНТЕКСТ
+Подход к структурированию агентных промптов: github.com
+Паттерн agents.md как управляющего промпта: datatalks.ru
+Лучшие практики написания AGENTS.md: neural-networked.ru
+Как писать README для AI-агентов: habr.com
+
+---
+
+Этот файл кладётся в корень репозитория как `AGENTS.md` (или `README.md`). Агент читает его **перед каждой сессией** и следует описанному порядку. Ключевые особенности промпта:
+
+- **Бизнес-контекст** вынесен явно — агент понимает *зачем* прогноз, а не только *что* прогнозировать
+- **Таблица ставок** делает асимметрию ошибки очевидной
+- **Чек-листы** (`- [ ]`) дают агенту явный список задач для выполнения
+- **Стоп-сигналы** предотвращают автоматический деплой некачественной модели

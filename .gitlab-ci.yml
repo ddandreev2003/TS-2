@@ -1,0 +1,25 @@
+stages:
+  - validate
+  - train
+  - evaluate
+  - deploy
+
+validate:
+  stage: validate
+  script:
+    - echo "CI template: validate step pending"
+
+train:
+  stage: train
+  script:
+    - echo "CI template: train step pending"
+
+evaluate:
+  stage: evaluate
+  script:
+    - echo "CI template: evaluate step pending"
+
+deploy:
+  stage: deploy
+  script:
+    - echo "CI template: deploy step pending"

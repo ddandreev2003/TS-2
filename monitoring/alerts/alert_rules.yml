@@ -1,0 +1,6 @@
+# Alert rules template
+# Add production thresholds and alert channels later.
+
+groups:
+  - name: liquidity_forecast_alerts
+    rules: []

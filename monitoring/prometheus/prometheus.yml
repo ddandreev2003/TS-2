@@ -1,0 +1,10 @@
+# Prometheus configuration template
+# Add scrape targets when monitoring is implemented.
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'app'
+    static_configs:
+      - targets: ['app:8000']

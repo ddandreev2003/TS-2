@@ -1,0 +1,9 @@
+# Monitoring configuration template
+# Populate once drift and alerting are implemented.
+
+metrics:
+  balance_mae_threshold: 0.42
+  drift_threshold: 0.2
+alerts:
+  enable_prometheus: false
+  enable_grafana: false

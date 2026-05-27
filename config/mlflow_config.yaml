@@ -1,0 +1,5 @@
+# MLflow configuration template
+# Populate when MLOps phase starts.
+
+tracking_uri: http://localhost:5000
+experiment_name: liquidity_forecast
