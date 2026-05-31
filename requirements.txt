@@ -1,5 +1,20 @@
-# Add project dependencies here when implementation starts.
 pandas
 numpy
 scikit-learn
 statsmodels
+scipy
+matplotlib
+seaborn
+holidays
+requests
+pyyaml
+joblib
+pytest
+fastapi
+uvicorn[standard]
+prometheus-client
+mlflow
+httpx
+streamlit
+plotly
+supervisor

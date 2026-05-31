@@ -1,0 +1,17 @@
+{
+  "completed_at": "2026-05-31T10:52:35.298802+00:00",
+  "reason": "manual",
+  "training_window_reason": "rolling window=316 rows (min=60, max=400, n=396)",
+  "metrics_before": {
+    "best_balance_mae": 3.3755550438163696e-16,
+    "n_train": 316,
+    "model_count": 10
+  },
+  "metrics_after": {
+    "best_balance_mae": 3.3755550438163696e-16,
+    "n_train": 316,
+    "model_count": 10
+  },
+  "improved": true,
+  "training_window": 316
+}

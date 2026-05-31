@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: liquidity-ml
+    orgId: 1
+    folder: TS-2
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

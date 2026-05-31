@@ -1,0 +1,8 @@
+{
+  "mu": 2.0174749999999997,
+  "sigma": 0.533322615332705,
+  "method": "holdout",
+  "n_observations": 80,
+  "model_name": "arimax",
+  "created_at": "2026-05-31T10:52:33.148111+00:00"
+}

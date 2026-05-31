@@ -1,0 +1,459 @@
+{
+  "training_mode": "dual_target",
+  "n_train": 316,
+  "n_test": 80,
+  "model_metrics": {
+    "arima": {
+      "mae": 0.23930833021375064,
+      "rmse": 0.3241571627628883,
+      "smape": 194.58523928231807,
+      "directional_accuracy": 0.45569620253164556,
+      "within_threshold_share": 0.8625,
+      "max_abs_error": 1.4091527183282335,
+      "sign_accuracy": 0.7375,
+      "asymmetric_cost": 0.28076709257920573
+    },
+    "arimax": {
+      "mae": 3.3755550438163696e-16,
+      "rmse": 4.3708528049004683e-16,
+      "smape": 4.643658470472022e-13,
+      "directional_accuracy": 1.0,
+      "within_threshold_share": 1.0,
+      "max_abs_error": 1.1102230246251565e-15,
+      "sign_accuracy": 1.0,
+      "asymmetric_cost": 3.484363291316125e-16
+    },
+    "dual_target_elasticnet": {
+      "Income": {
+        "mae": 5.0747903741241165e-05,
+        "rmse": 8.683706808172321e-05,
+        "smape": 0.0027815487527346923,
+        "directional_accuracy": 0.9746835443037974
+      },
+      "Outcome": {
+        "mae": 2.1765678879800966e-05,
+        "rmse": 3.095671007204277e-05,
+        "smape": 0.0010605376641556093,
+        "directional_accuracy": 0.9873417721518988
+      },
+      "Balance": {
+        "mae": 0.004013356302336341,
+        "rmse": 0.004876875671864352,
+        "smape": 8.958155227529998,
+        "directional_accuracy": 0.9746835443037974,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.010046697952677236,
+        "sign_accuracy": 0.9875,
+        "asymmetric_cost": 0.004146679166428512
+      }
+    },
+    "dual_target_extra_trees": {
+      "Income": {
+        "mae": 0.05707406249999989,
+        "rmse": 0.25466730842476093,
+        "smape": 2.019188119609138,
+        "directional_accuracy": 0.9113924050632911
+      },
+      "Outcome": {
+        "mae": 0.07873162499999907,
+        "rmse": 0.25033795252992463,
+        "smape": 2.860857828291172,
+        "directional_accuracy": 0.9493670886075949
+      },
+      "Balance": {
+        "mae": 0.05464481249999901,
+        "rmse": 0.09354087256548493,
+        "smape": 32.23915585423941,
+        "directional_accuracy": 0.8481012658227848,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.3667549999999973,
+        "sign_accuracy": 0.9625,
+        "asymmetric_cost": 0.060967789473683046
+      }
+    },
+    "dual_target_gradient_boosting": {
+      "Income": {
+        "mae": 0.06130038345288893,
+        "rmse": 0.254192773071573,
+        "smape": 2.227333428839434,
+        "directional_accuracy": 0.9240506329113924
+      },
+      "Outcome": {
+        "mae": 0.07419568855705498,
+        "rmse": 0.24683224041480642,
+        "smape": 2.704425109586798,
+        "directional_accuracy": 0.9620253164556962
+      },
+      "Balance": {
+        "mae": 0.05003106381751057,
+        "rmse": 0.08358554673293189,
+        "smape": 39.201935184252214,
+        "directional_accuracy": 0.8607594936708861,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.40759566781165124,
+        "sign_accuracy": 0.925,
+        "asymmetric_cost": 0.06130814282482333
+      }
+    },
+    "dual_target_lasso": {
+      "Income": {
+        "mae": 0.00011452905926687129,
+        "rmse": 0.00019305762291236034,
+        "smape": 0.005296314179207815,
+        "directional_accuracy": 0.9746835443037974
+      },
+      "Outcome": {
+        "mae": 0.00015576175057884777,
+        "rmse": 0.00020938697622180716,
+        "smape": 0.0067413049106690055,
+        "directional_accuracy": 1.0
+      },
+      "Balance": {
+        "mae": 0.004045147229747789,
+        "rmse": 0.004895168434710122,
+        "smape": 9.069736533759464,
+        "directional_accuracy": 0.9620253164556962,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.00996718337873996,
+        "sign_accuracy": 0.9875,
+        "asymmetric_cost": 0.0041795682209422435
+      }
+    },
+    "dual_target_naive": {
+      "Income": {
+        "mae": 0.7130624999999998,
+        "rmse": 0.8847300930227251,
+        "smape": 44.964041310590794,
+        "directional_accuracy": 0.02531645569620253
+      },
+      "Outcome": {
+        "mae": 0.519725,
+        "rmse": 0.7213356015059842,
+        "smape": 26.518168674378227,
+        "directional_accuracy": 0.012658227848101266
+      },
+      "Balance": {
+        "mae": 0.2926874999999999,
+        "rmse": 0.349132263619391,
+        "smape": 103.05675066100252,
+        "directional_accuracy": 0.0,
+        "within_threshold_share": 0.75,
+        "max_abs_error": 1.0640000000000003,
+        "sign_accuracy": 0.7375,
+        "asymmetric_cost": 0.4499210526315788
+      }
+    },
+    "dual_target_random_forest": {
+      "Income": {
+        "mae": 0.06896328002536628,
+        "rmse": 0.27546419740741857,
+        "smape": 2.624814284301765,
+        "directional_accuracy": 0.9113924050632911
+      },
+      "Outcome": {
+        "mae": 0.08065400000000007,
+        "rmse": 0.2695205613399467,
+        "smape": 2.9242509495768974,
+        "directional_accuracy": 0.9367088607594937
+      },
+      "Balance": {
+        "mae": 0.05936069234004408,
+        "rmse": 0.11403539017232883,
+        "smape": 37.691507932707054,
+        "directional_accuracy": 0.8607594936708861,
+        "within_threshold_share": 0.9875,
+        "max_abs_error": 0.6093924828855788,
+        "sign_accuracy": 0.9375,
+        "asymmetric_cost": 0.06609311322137974
+      }
+    },
+    "dual_target_ridge": {
+      "Income": {
+        "mae": 7.885356214931694e-08,
+        "rmse": 1.1934550032804305e-07,
+        "smape": 4.104755786306769e-06,
+        "directional_accuracy": 0.9746835443037974
+      },
+      "Outcome": {
+        "mae": 1.160356625118375e-07,
+        "rmse": 1.8697168356029972e-07,
+        "smape": 5.324201424274504e-06,
+        "directional_accuracy": 0.9873417721518988
+      },
+      "Balance": {
+        "mae": 0.00402501659324805,
+        "rmse": 0.004896402370690114,
+        "smape": 9.10928461954948,
+        "directional_accuracy": 0.9620253164556962,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.00999997839839345,
+        "sign_accuracy": 0.9875,
+        "asymmetric_cost": 0.004157913919764354
+      }
+    },
+    "sarima": {
+      "mae": 0.24228291383838654,
+      "rmse": 0.3283515432247247,
+      "smape": 199.3302781102043,
+      "directional_accuracy": 0.6835443037974683,
+      "within_threshold_share": 0.8625,
+      "max_abs_error": 1.475272185256616,
+      "sign_accuracy": 0.5125,
+      "asymmetric_cost": 0.39947479140301956
+    }
+  },
+  "quality_gate_passed": {
+    "arima": true,
+    "arimax": true,
+    "dual_target_elasticnet": true,
+    "dual_target_extra_trees": true,
+    "dual_target_gradient_boosting": true,
+    "dual_target_lasso": true,
+    "dual_target_naive": true,
+    "dual_target_random_forest": true,
+    "dual_target_ridge": true,
+    "sarima": true
+  },
+  "business_ranking": [
+    {
+      "model": "arimax",
+      "asymmetric_cost": 3.484363291316125e-16
+    },
+    {
+      "model": "dual_target_elasticnet",
+      "asymmetric_cost": 0.004146679166428512
+    },
+    {
+      "model": "dual_target_ridge",
+      "asymmetric_cost": 0.004157913919764354
+    },
+    {
+      "model": "dual_target_lasso",
+      "asymmetric_cost": 0.0041795682209422435
+    },
+    {
+      "model": "dual_target_extra_trees",
+      "asymmetric_cost": 0.060967789473683046
+    },
+    {
+      "model": "dual_target_gradient_boosting",
+      "asymmetric_cost": 0.06130814282482333
+    },
+    {
+      "model": "dual_target_random_forest",
+      "asymmetric_cost": 0.06609311322137974
+    },
+    {
+      "model": "arima",
+      "asymmetric_cost": 0.28076709257920573
+    },
+    {
+      "model": "sarima",
+      "asymmetric_cost": 0.39947479140301956
+    },
+    {
+      "model": "dual_target_naive",
+      "asymmetric_cost": 0.4499210526315788
+    }
+  ],
+  "train_metrics": {
+    "dual_target_naive": {
+      "Income": {
+        "mae": 0.7130624999999998,
+        "rmse": 0.8847300930227251,
+        "smape": 44.964041310590794,
+        "directional_accuracy": 0.02531645569620253
+      },
+      "Outcome": {
+        "mae": 0.519725,
+        "rmse": 0.7213356015059842,
+        "smape": 26.518168674378227,
+        "directional_accuracy": 0.012658227848101266
+      },
+      "Balance": {
+        "mae": 0.2926874999999999,
+        "rmse": 0.349132263619391,
+        "smape": 103.05675066100252,
+        "directional_accuracy": 0.0,
+        "within_threshold_share": 0.75,
+        "max_abs_error": 1.0640000000000003,
+        "sign_accuracy": 0.7375,
+        "asymmetric_cost": 0.4499210526315788
+      }
+    },
+    "dual_target_lasso": {
+      "Income": {
+        "mae": 0.00011452905926687129,
+        "rmse": 0.00019305762291236034,
+        "smape": 0.005296314179207815,
+        "directional_accuracy": 0.9746835443037974
+      },
+      "Outcome": {
+        "mae": 0.00015576175057884777,
+        "rmse": 0.00020938697622180716,
+        "smape": 0.0067413049106690055,
+        "directional_accuracy": 1.0
+      },
+      "Balance": {
+        "mae": 0.004045147229747789,
+        "rmse": 0.004895168434710122,
+        "smape": 9.069736533759464,
+        "directional_accuracy": 0.9620253164556962,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.00996718337873996,
+        "sign_accuracy": 0.9875,
+        "asymmetric_cost": 0.0041795682209422435
+      }
+    },
+    "dual_target_ridge": {
+      "Income": {
+        "mae": 7.885356214931694e-08,
+        "rmse": 1.1934550032804305e-07,
+        "smape": 4.104755786306769e-06,
+        "directional_accuracy": 0.9746835443037974
+      },
+      "Outcome": {
+        "mae": 1.160356625118375e-07,
+        "rmse": 1.8697168356029972e-07,
+        "smape": 5.324201424274504e-06,
+        "directional_accuracy": 0.9873417721518988
+      },
+      "Balance": {
+        "mae": 0.00402501659324805,
+        "rmse": 0.004896402370690114,
+        "smape": 9.10928461954948,
+        "directional_accuracy": 0.9620253164556962,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.00999997839839345,
+        "sign_accuracy": 0.9875,
+        "asymmetric_cost": 0.004157913919764354
+      }
+    },
+    "dual_target_elasticnet": {
+      "Income": {
+        "mae": 5.0747903741241165e-05,
+        "rmse": 8.683706808172321e-05,
+        "smape": 0.0027815487527346923,
+        "directional_accuracy": 0.9746835443037974
+      },
+      "Outcome": {
+        "mae": 2.1765678879800966e-05,
+        "rmse": 3.095671007204277e-05,
+        "smape": 0.0010605376641556093,
+        "directional_accuracy": 0.9873417721518988
+      },
+      "Balance": {
+        "mae": 0.004013356302336341,
+        "rmse": 0.004876875671864352,
+        "smape": 8.958155227529998,
+        "directional_accuracy": 0.9746835443037974,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.010046697952677236,
+        "sign_accuracy": 0.9875,
+        "asymmetric_cost": 0.004146679166428512
+      }
+    },
+    "dual_target_random_forest": {
+      "Income": {
+        "mae": 0.06896328002536628,
+        "rmse": 0.27546419740741857,
+        "smape": 2.624814284301765,
+        "directional_accuracy": 0.9113924050632911
+      },
+      "Outcome": {
+        "mae": 0.08065400000000007,
+        "rmse": 0.2695205613399467,
+        "smape": 2.9242509495768974,
+        "directional_accuracy": 0.9367088607594937
+      },
+      "Balance": {
+        "mae": 0.05936069234004408,
+        "rmse": 0.11403539017232883,
+        "smape": 37.691507932707054,
+        "directional_accuracy": 0.8607594936708861,
+        "within_threshold_share": 0.9875,
+        "max_abs_error": 0.6093924828855788,
+        "sign_accuracy": 0.9375,
+        "asymmetric_cost": 0.06609311322137974
+      }
+    },
+    "dual_target_extra_trees": {
+      "Income": {
+        "mae": 0.05707406249999989,
+        "rmse": 0.25466730842476093,
+        "smape": 2.019188119609138,
+        "directional_accuracy": 0.9113924050632911
+      },
+      "Outcome": {
+        "mae": 0.07873162499999907,
+        "rmse": 0.25033795252992463,
+        "smape": 2.860857828291172,
+        "directional_accuracy": 0.9493670886075949
+      },
+      "Balance": {
+        "mae": 0.05464481249999901,
+        "rmse": 0.09354087256548493,
+        "smape": 32.23915585423941,
+        "directional_accuracy": 0.8481012658227848,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.3667549999999973,
+        "sign_accuracy": 0.9625,
+        "asymmetric_cost": 0.060967789473683046
+      }
+    },
+    "dual_target_gradient_boosting": {
+      "Income": {
+        "mae": 0.06130038345288893,
+        "rmse": 0.254192773071573,
+        "smape": 2.227333428839434,
+        "directional_accuracy": 0.9240506329113924
+      },
+      "Outcome": {
+        "mae": 0.07419568855705498,
+        "rmse": 0.24683224041480642,
+        "smape": 2.704425109586798,
+        "directional_accuracy": 0.9620253164556962
+      },
+      "Balance": {
+        "mae": 0.05003106381751057,
+        "rmse": 0.08358554673293189,
+        "smape": 39.201935184252214,
+        "directional_accuracy": 0.8607594936708861,
+        "within_threshold_share": 1.0,
+        "max_abs_error": 0.40759566781165124,
+        "sign_accuracy": 0.925,
+        "asymmetric_cost": 0.06130814282482333
+      }
+    },
+    "arima": {
+      "mae": 0.23930833021375064,
+      "rmse": 0.3241571627628883,
+      "smape": 194.58523928231807,
+      "directional_accuracy": 0.45569620253164556,
+      "within_threshold_share": 0.8625,
+      "max_abs_error": 1.4091527183282335,
+      "sign_accuracy": 0.7375,
+      "asymmetric_cost": 0.28076709257920573
+    },
+    "sarima": {
+      "mae": 0.24228291383838654,
+      "rmse": 0.3283515432247247,
+      "smape": 199.3302781102043,
+      "directional_accuracy": 0.6835443037974683,
+      "within_threshold_share": 0.8625,
+      "max_abs_error": 1.475272185256616,
+      "sign_accuracy": 0.5125,
+      "asymmetric_cost": 0.39947479140301956
+    },
+    "arimax": {
+      "mae": 3.3755550438163696e-16,
+      "rmse": 4.3708528049004683e-16,
+      "smape": 4.643658470472022e-13,
+      "directional_accuracy": 1.0,
+      "within_threshold_share": 1.0,
+      "max_abs_error": 1.1102230246251565e-15,
+      "sign_accuracy": 1.0,
+      "asymmetric_cost": 3.484363291316125e-16
+    }
+  }
+}

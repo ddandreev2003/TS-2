@@ -2,24 +2,59 @@ stages:
   - validate
   - train
   - evaluate
+  - report
   - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 validate:
   stage: validate
   script:
-    - echo "CI template: validate step pending"
+    - pip install -r requirements.txt
+    - pytest tests/unit tests/integration/test_api.py -q -m "not slow"
 
 train:
   stage: train
   script:
-    - echo "CI template: train step pending"
+    - pip install -r requirements.txt
+    - python -m pipelines.train_pipeline --config config/model_config.yaml
+  artifacts:
+    paths:
+      - artifacts/
+    expire_in: 1 week
+  allow_failure: true
+  when: manual
 
 evaluate:
   stage: evaluate
   script:
-    - echo "CI template: evaluate step pending"
+    - pip install -r requirements.txt
+    - python -m pipelines.eval_pipeline --config config/model_config.yaml
+    - pytest tests/model_quality -q
+  needs:
+    - job: train
+      optional: true
+
+report:
+  stage: report
+  script:
+    - pip install -r requirements.txt
+    - python -m pipelines.report_pipeline --config config/model_config.yaml
+  artifacts:
+    paths:
+      - artifacts/plots/
+      - artifacts/report_manifest.json
+      - artifacts/holdout_predictions.json
+    expire_in: 1 week
+  needs:
+    - job: evaluate
+      optional: true
+  allow_failure: true
+  when: manual
 
 deploy:
   stage: deploy
   script:
-    - echo "CI template: deploy step pending"
+    - docker compose build
+  when: manual

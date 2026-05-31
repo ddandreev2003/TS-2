@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-05-31T10:53:52.203661+00:00",
+  "plots_dir": "artifacts/plots",
+  "plot_groups": {
+    "eda": [
+      "artifacts/plots/eda_balance_timeseries.png",
+      "artifacts/plots/eda_income_outcome.png",
+      "artifacts/plots/eda_balance_distribution.png",
+      "artifacts/plots/eda_seasonality.png",
+      "artifacts/plots/eda_acf_pacf.png",
+      "artifacts/plots/eda_year_month_heatmap.png"
+    ],
+    "features": [
+      "artifacts/plots/fs_stability_bars.png",
+      "artifacts/plots/fs_stability_mae_tradeoff.png",
+      "artifacts/plots/fs_top_correlations.png"
+    ],
+    "models": [
+      "artifacts/plots/models_mae_bar.png",
+      "artifacts/plots/models_asymmetric_cost_bar.png",
+      "artifacts/plots/models_forecast_grid.png",
+      "artifacts/plots/forecast_arimax.png",
+      "artifacts/plots/forecast_arima.png",
+      "artifacts/plots/forecast_dual_target_elasticnet.png",
+      "artifacts/plots/forecast_dual_target_extra_trees.png"
+    ],
+    "drift": [
+      "artifacts/plots/drift_residuals.png",
+      "artifacts/plots/drift_standardized_residuals.png",
+      "artifacts/plots/drift_control_chart.png"
+    ]
+  },
+  "plot_files": [
+    "artifacts/plots/eda_balance_timeseries.png",
+    "artifacts/plots/eda_income_outcome.png",
+    "artifacts/plots/eda_balance_distribution.png",
+    "artifacts/plots/eda_seasonality.png",
+    "artifacts/plots/eda_acf_pacf.png",
+    "artifacts/plots/eda_year_month_heatmap.png",
+    "artifacts/plots/fs_stability_bars.png",
+    "artifacts/plots/fs_stability_mae_tradeoff.png",
+    "artifacts/plots/fs_top_correlations.png",
+    "artifacts/plots/models_mae_bar.png",
+    "artifacts/plots/models_asymmetric_cost_bar.png",
+    "artifacts/plots/models_forecast_grid.png",
+    "artifacts/plots/forecast_arimax.png",
+    "artifacts/plots/forecast_arima.png",
+    "artifacts/plots/forecast_dual_target_elasticnet.png",
+    "artifacts/plots/forecast_dual_target_extra_trees.png",
+    "artifacts/plots/drift_residuals.png",
+    "artifacts/plots/drift_standardized_residuals.png",
+    "artifacts/plots/drift_control_chart.png"
+  ],
+  "feature_selection_method": "lasso",
+  "best_model": "arimax",
+  "n_plots": 19
+}

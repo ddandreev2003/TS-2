@@ -1,0 +1,644 @@
+{
+  "records": [
+    {
+      "date": "2020-06-02",
+      "y_true": 1.235,
+      "y_pred": -0.12999999999999984,
+      "residual": 1.365,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-06-03",
+      "y_true": 1.185,
+      "y_pred": -0.09299999999999982,
+      "residual": 1.2779999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-06-09",
+      "y_true": 1.409,
+      "y_pred": -1.4749999999999999,
+      "residual": 2.884,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-06-10",
+      "y_true": 1.87,
+      "y_pred": 0.23299999999999899,
+      "residual": 1.6370000000000011,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-06-16",
+      "y_true": 1.475,
+      "y_pred": -0.3359999999999999,
+      "residual": 1.811,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-06-23",
+      "y_true": 1.672,
+      "y_pred": -0.3989999999999998,
+      "residual": 2.0709999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-06-30",
+      "y_true": 2.37,
+      "y_pred": 0.22300000000000003,
+      "residual": 2.1470000000000002,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-07",
+      "y_true": 1.62,
+      "y_pred": 0.15000000000000002,
+      "residual": 1.4700000000000002,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-08",
+      "y_true": 1.462,
+      "y_pred": 0.02499999999999997,
+      "residual": 1.437,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-14",
+      "y_true": 1.62,
+      "y_pred": -0.08699999999999994,
+      "residual": 1.707,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-15",
+      "y_true": 1.672,
+      "y_pred": -0.02299999999999997,
+      "residual": 1.6949999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-21",
+      "y_true": 1.672,
+      "y_pred": 0.16700000000000007,
+      "residual": 1.505,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-22",
+      "y_true": 1.396,
+      "y_pred": 0.021000000000000105,
+      "residual": 1.3749999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-28",
+      "y_true": 1.593,
+      "y_pred": -0.13800000000000054,
+      "residual": 1.7310000000000005,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-07-29",
+      "y_true": 1.448,
+      "y_pred": -0.1410000000000006,
+      "residual": 1.5890000000000006,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-04",
+      "y_true": 1.435,
+      "y_pred": -0.02499999999999981,
+      "residual": 1.46,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-05",
+      "y_true": 1.685,
+      "y_pred": 0.2130000000000001,
+      "residual": 1.472,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-11",
+      "y_true": 1.712,
+      "y_pred": 0.002000000000000184,
+      "residual": 1.7099999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-12",
+      "y_true": 1.646,
+      "y_pred": 0.08700000000000017,
+      "residual": 1.5589999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-18",
+      "y_true": 1.369,
+      "y_pred": -0.37799999999999984,
+      "residual": 1.7469999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-19",
+      "y_true": 1.514,
+      "y_pred": -0.128,
+      "residual": 1.642,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-25",
+      "y_true": 1.896,
+      "y_pred": -0.08499999999999981,
+      "residual": 1.9809999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-08-26",
+      "y_true": 1.33,
+      "y_pred": -0.28299999999999975,
+      "residual": 1.6129999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-01",
+      "y_true": 1.422,
+      "y_pred": -0.29499999999999965,
+      "residual": 1.7169999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-02",
+      "y_true": 1.301,
+      "y_pred": -0.04699999999999978,
+      "residual": 1.3479999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-08",
+      "y_true": 1.383,
+      "y_pred": -0.1739999999999996,
+      "residual": 1.5569999999999995,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-09",
+      "y_true": 1.514,
+      "y_pred": 0.11800000000000022,
+      "residual": 1.396,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-15",
+      "y_true": 2.001,
+      "y_pred": 0.06600000000000006,
+      "residual": 1.9349999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-16",
+      "y_true": 1.422,
+      "y_pred": -0.12199999999999989,
+      "residual": 1.5439999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-22",
+      "y_true": 1.475,
+      "y_pred": -0.23299999999999965,
+      "residual": 1.7079999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-23",
+      "y_true": 1.462,
+      "y_pred": -0.2309999999999998,
+      "residual": 1.6929999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-29",
+      "y_true": 2.067,
+      "y_pred": 0.027000000000000312,
+      "residual": 2.04,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-09-30",
+      "y_true": 2.186,
+      "y_pred": -0.1569999999999997,
+      "residual": 2.3429999999999995,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-06",
+      "y_true": 1.62,
+      "y_pred": -0.11799999999999967,
+      "residual": 1.7379999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-07",
+      "y_true": 1.475,
+      "y_pred": -0.11899999999999974,
+      "residual": 1.5939999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-13",
+      "y_true": 1.712,
+      "y_pred": 0.043000000000000295,
+      "residual": 1.6689999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-14",
+      "y_true": 1.712,
+      "y_pred": -0.6889999999999994,
+      "residual": 2.4009999999999994,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-20",
+      "y_true": 1.83,
+      "y_pred": -0.1989999999999997,
+      "residual": 2.029,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-21",
+      "y_true": 1.554,
+      "y_pred": -0.27699999999999975,
+      "residual": 1.8309999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-27",
+      "y_true": 1.804,
+      "y_pred": -0.2869999999999999,
+      "residual": 2.091,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-10-28",
+      "y_true": 1.791,
+      "y_pred": -0.6589999999999999,
+      "residual": 2.4499999999999997,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-03",
+      "y_true": 1.738,
+      "y_pred": -0.09199999999999972,
+      "residual": 1.8299999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-10",
+      "y_true": 1.909,
+      "y_pred": -0.24399999999999944,
+      "residual": 2.1529999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-11",
+      "y_true": 1.778,
+      "y_pred": 0.07500000000000036,
+      "residual": 1.7029999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-17",
+      "y_true": 1.554,
+      "y_pred": -0.28600000000000003,
+      "residual": 1.84,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-18",
+      "y_true": 1.725,
+      "y_pred": -0.3050000000000001,
+      "residual": 2.0300000000000002,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-24",
+      "y_true": 1.857,
+      "y_pred": -0.2209999999999995,
+      "residual": 2.0779999999999994,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-11-25",
+      "y_true": 2.067,
+      "y_pred": -0.6719999999999995,
+      "residual": 2.739,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-01",
+      "y_true": 1.62,
+      "y_pred": -0.7549999999999993,
+      "residual": 2.3749999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-02",
+      "y_true": 1.633,
+      "y_pred": -0.17699999999999982,
+      "residual": 1.8099999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-08",
+      "y_true": 1.751,
+      "y_pred": -0.3329999999999993,
+      "residual": 2.083999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-09",
+      "y_true": 1.817,
+      "y_pred": -0.029999999999999485,
+      "residual": 1.8469999999999995,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-15",
+      "y_true": 2.396,
+      "y_pred": -0.2289999999999999,
+      "residual": 2.625,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-16",
+      "y_true": 2.436,
+      "y_pred": 0.09299999999999994,
+      "residual": 2.343,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-22",
+      "y_true": 2.423,
+      "y_pred": -0.21199999999999974,
+      "residual": 2.635,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-23",
+      "y_true": 2.568,
+      "y_pred": 0.10099999999999994,
+      "residual": 2.467,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-29",
+      "y_true": 4.292,
+      "y_pred": 0.006000000000000636,
+      "residual": 4.286,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2020-12-30",
+      "y_true": 4.49,
+      "y_pred": 0.15900000000000067,
+      "residual": 4.3309999999999995,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-01-13",
+      "y_true": 1.672,
+      "y_pred": -0.1819999999999999,
+      "residual": 1.8539999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-01-19",
+      "y_true": 1.606,
+      "y_pred": -0.3799999999999995,
+      "residual": 1.9859999999999995,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-01-20",
+      "y_true": 1.949,
+      "y_pred": -0.16099999999999973,
+      "residual": 2.11,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-01-26",
+      "y_true": 1.738,
+      "y_pred": -0.3769999999999998,
+      "residual": 2.1149999999999998,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-01-27",
+      "y_true": 1.804,
+      "y_pred": -0.17000000000000004,
+      "residual": 1.9740000000000002,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-02",
+      "y_true": 1.501,
+      "y_pred": -0.3919999999999993,
+      "residual": 1.8929999999999991,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-03",
+      "y_true": 1.567,
+      "y_pred": -0.4789999999999992,
+      "residual": 2.0459999999999994,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-09",
+      "y_true": 1.778,
+      "y_pred": -0.5159999999999995,
+      "residual": 2.2939999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-10",
+      "y_true": 2.317,
+      "y_pred": 0.21600000000000014,
+      "residual": 2.101,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-16",
+      "y_true": 1.764,
+      "y_pred": -0.23799999999999913,
+      "residual": 2.0019999999999993,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-17",
+      "y_true": 1.646,
+      "y_pred": -0.18799999999999922,
+      "residual": 1.8339999999999992,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-20",
+      "y_true": 1.791,
+      "y_pred": -0.2659999999999997,
+      "residual": 2.0569999999999995,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-02-25",
+      "y_true": 2.581,
+      "y_pred": -0.5299999999999991,
+      "residual": 3.110999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-02",
+      "y_true": 1.922,
+      "y_pred": -0.44799999999999895,
+      "residual": 2.3699999999999988,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-03",
+      "y_true": 1.699,
+      "y_pred": -0.23199999999999962,
+      "residual": 1.9309999999999996,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-10",
+      "y_true": 2.173,
+      "y_pred": 0.02500000000000002,
+      "residual": 2.148,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-16",
+      "y_true": 1.659,
+      "y_pred": -0.5119999999999989,
+      "residual": 2.170999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-17",
+      "y_true": 1.817,
+      "y_pred": -0.4129999999999991,
+      "residual": 2.229999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-23",
+      "y_true": 2.489,
+      "y_pred": 0.09800000000000066,
+      "residual": 2.390999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-24",
+      "y_true": 1.936,
+      "y_pred": -0.5879999999999993,
+      "residual": 2.523999999999999,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-30",
+      "y_true": 2.317,
+      "y_pred": -0.2599999999999996,
+      "residual": 2.577,
+      "status": "holdout",
+      "model": "arimax"
+    },
+    {
+      "date": "2021-03-31",
+      "y_true": 2.528,
+      "y_pred": -0.005000000000000053,
+      "residual": 2.533,
+      "status": "holdout",
+      "model": "arimax"
+    }
+  ]
+}

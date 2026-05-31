@@ -1,0 +1,14 @@
+artifact_uri: file:///home/andrn/TS-2/mlflow/571089774038325513/23b4cff3e7e24e72a9290cafa4ebb6f4/artifacts
+end_time: 1780224755295
+entry_point_name: ''
+experiment_id: '571089774038325513'
+lifecycle_stage: active
+run_id: 23b4cff3e7e24e72a9290cafa4ebb6f4
+run_name: train_dual_target
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1780224755271
+status: 3
+tags: []
+user_id: andrn

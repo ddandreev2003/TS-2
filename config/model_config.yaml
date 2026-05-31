@@ -1,21 +1,115 @@
-# Model and pipeline configuration template
-# Replace defaults with validated values during implementation.
+# Model and pipeline configuration (migrated from notebook constants)
+
+random_state: 42
 
 data:
+  path: data.csv
+  date_column: Date
+  target_column: Balance
   target_columns:
     - Income
     - Outcome
   derived_target: Balance
-  date_column: Date
+  income_column: Income
+  outcome_column: Outcome
 
 features:
-  lags: [1, 2, 3, 5, 7, 14]
-  rolling_windows: [3, 7, 14, 30]
+  lags: [1, 2, 3, 5, 10, 20]
+  rolling_windows: [5, 10, 20]
+  ewm_spans: [5, 20]
+  diff_lags: [1, 5]
+  target_columns_for_ar: [Balance, Income, Outcome]
+
+macro:
+  use_cbr_api: false
+  csv_columns:
+    - IMICEX
+    - TransRUB1M
+    - covid
+    - IsDayOff_Status_Workalendar_RU
+  macro_diff_lag: 5
+  api_start_date: "2017-01-01"
+  api_end_date: "2021-03-31"
+
+selection:
+  top_k_features: 20
+  fs_cv_folds: 5
+  consensus_min_folds: 3
+  gamma_values: [0.3, 0.5, 0.7]
+  ranking_gamma: 0.5
+  arimax_exog_count: 12
+  probe_rf:
+    n_estimators: 200
+    max_depth: 8
 
 split:
+  holdout_ratio: 0.8
   test_size: 0.2
   validation_size: 0.1
   time_series_cv_folds: 5
+  arimax_cv_folds: 3
+
+models:
+  seasonal_period: 5
+  arima:
+    p_range: [0, 1, 2, 3]
+    d_range: [0, 1]
+    q_range: [0, 1, 2, 3]
+  sarima:
+    P_range: [0, 1]
+    D_range: [0, 1]
+    Q_range: [0, 1]
+  linear:
+    alpha_min: 0.0001
+    alpha_max: 10.0
+    alpha_steps: 20
+    l1_ratio: [0.1, 0.5, 0.9]
+  nonlinear:
+    n_estimators: [100, 200]
+    max_depth: [4, 8, null]
+    min_samples_leaf: [1, 3, 5]
+    max_features: [sqrt, 0.5]
 
 metrics:
   balance_mae_threshold: 0.42
+  surplus_spread: 0.009
+  deficit_spread: 0.010
+
+calibration:
+  cadence_candidates: [1, 5, 10, 20, 40]
+  min_training_window: 60
+  max_training_window: 400
+  max_mae_degradation: 0.05
+  eval_horizon_days: 5
+  default_cadence_days: 20
+
+retraining:
+  enabled: true
+  auto_retrain: true
+  retrain_on_drift: true
+  retrain_on_schedule: true
+  log_dir: retraining
+
+training:
+  mode: dual_target  # dual_target | balance (legacy)
+  include_arima_benchmark: true
+  dual_target_models:
+    - naive
+    - lasso
+    - ridge
+    - elasticnet
+    - random_forest
+    - extra_trees
+    - gradient_boosting
+
+artifacts:
+  dir: artifacts
+  feature_sets: artifacts/feature_sets.json
+  metrics: artifacts/metrics.json
+  eval_metrics: artifacts/eval_metrics.json
+  calibration_policy: artifacts/calibration_policy.json
+  model_ranking: artifacts/model_ranking.csv
+  models_dir: artifacts/models
+  drift_status: artifacts/drift_status.json
+  holdout_predictions: artifacts/holdout_predictions.json
+  report_manifest: artifacts/report_manifest.json

@@ -1,6 +1,29 @@
-# Alert rules template
-# Add production thresholds and alert channels later.
-
 groups:
   - name: liquidity_forecast_alerts
-    rules: []
+    rules:
+      - alert: BalanceMAEHigh
+        expr: model_balance_mae > 0.42
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Balance MAE above quality gate"
+          description: "Hold-out Balance MAE exceeds 0.42. Review model or retrain."
+
+      - alert: DataDriftDetected
+        expr: increase(model_drift_alerts_total[1h]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Forecast residual drift detected"
+          description: "Consider manual control or unplanned retraining."
+
+      - alert: ModelStale
+        expr: time() - model_last_train_timestamp > 1209600
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model not retrained in 14 days"
+          description: "Schedule review or retraining."

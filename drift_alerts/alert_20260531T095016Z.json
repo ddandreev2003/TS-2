@@ -1,0 +1,35 @@
+{
+  "checked_at": "2026-05-31T09:50:16.329811+00:00",
+  "status": "alarm",
+  "alert": {
+    "detected": true,
+    "method": "cusum",
+    "alarm_index": 24,
+    "alarm_date": "2020-09-02",
+    "statistic_value": 9.331900684098962,
+    "recommended_actions": [
+      "manual_control",
+      "unplanned_retrain"
+    ],
+    "message": "Drift detected via cusum at index 24 (date=2020-09-02); statistic=9.3319",
+    "n_observations": 80
+  },
+  "baseline": {
+    "mu": 2.0172249227902554,
+    "sigma": 0.5324930028458551,
+    "method": "holdout",
+    "n_observations": 80,
+    "model_name": "dual_target_ridge",
+    "created_at": "2026-05-31T09:48:34.463249+00:00"
+  },
+  "n_residuals": 80,
+  "retrain_recommendation": {
+    "auto_retrain": false,
+    "reason": "drift_detected",
+    "recommended_actions": [
+      "manual_control",
+      "unplanned_retrain"
+    ]
+  },
+  "drift_trigger": true
+}

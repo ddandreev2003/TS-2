@@ -1,10 +1,80 @@
 version: '3.9'
 
 services:
+  init:
+    build: .
+    entrypoint: ["/docker/entrypoint.sh"]
+    command: ["python", "-c", "print('init complete')"]
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./config:/app/config
+      - ./retraining:/app/retraining
+      - ./drift_alerts:/app/drift_alerts
+    environment:
+      - SKIP_PIPELINE=${SKIP_PIPELINE:-0}
+      - MLFLOW_TRACKING_URI=file:/app/mlflow
+
   app:
     build: .
+    depends_on:
+      init:
+        condition: service_completed_successfully
     ports:
       - '8000:8000'
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./config:/app/config
+      - ./retraining:/app/retraining
+      - ./drift_alerts:/app/drift_alerts
     environment:
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-    # TODO: add mlflow, postgres, minio, prometheus, grafana when implementation starts.
+      - SKIP_PIPELINE=1
+      - MLFLOW_TRACKING_URI=file:/app/mlflow
+    command: ["uvicorn", "src.serving.api:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  dashboard:
+    build: .
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    ports:
+      - '8501:8501'
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./config:/app/config
+      - ./retraining:/app/retraining
+      - ./drift_alerts:/app/drift_alerts
+    environment:
+      - SKIP_PIPELINE=1
+    command:
+      [
+        "streamlit",
+        "run",
+        "src/dashboard/app.py",
+        "--server.port=8501",
+        "--server.address=0.0.0.0",
+        "--server.headless=true",
+      ]
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    depends_on:
+      - app
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts:/etc/prometheus/alerts:ro
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    depends_on:
+      - prometheus
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
